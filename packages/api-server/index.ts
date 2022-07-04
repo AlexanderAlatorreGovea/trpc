@@ -2,7 +2,7 @@ import express from "express";
 import * as trpc from "@trpc/server";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import cors from "cors";
-import z from "zod";
+import { z } from "zod";
 
 interface ChatMessage {
   user: string;
@@ -22,8 +22,20 @@ const appRouter = trpc
     },
   })
   .query("getMessages", {
-    resolve() {
-      return messages;
+    input: z.number().default(10),
+    resolve({ input }) {
+      return messages.slice(-input);
+    },
+  })
+  .mutation("addMessage", {
+    input: z.object({
+      user: z.string(),
+      message: z.string(),
+    }),
+    resolve({ input }) {
+      messages.push(input);
+
+      return input;
     },
   });
 
